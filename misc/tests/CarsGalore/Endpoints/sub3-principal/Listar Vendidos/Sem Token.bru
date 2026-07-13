@@ -1,0 +1,22 @@
+meta {
+  name: Sem Token
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://{{principal_service_host}}/listar-vendidos
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("deve falhar", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

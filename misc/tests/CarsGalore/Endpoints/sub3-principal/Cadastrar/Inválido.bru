@@ -1,0 +1,40 @@
+meta {
+  name: Inválido
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{principal_service_host}}/cadastrar
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "marca": "Gurgel",
+    "modelo": "BR-800",
+    "ano": 1990,
+    "placa": "ABC-2554",
+    "cor": "Prata",
+    "valor": 25000.00
+  }
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("funcionario_bearer_token")}`
+  )
+}
+
+tests {
+  test("deve falhar", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

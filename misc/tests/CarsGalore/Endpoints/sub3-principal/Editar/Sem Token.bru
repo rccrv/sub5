@@ -1,0 +1,33 @@
+meta {
+  name: Sem Token
+  type: http
+  seq: 1
+}
+
+put {
+  url: http://{{principal_service_host}}/editar/{{veiculo1_placa}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "marca": "Gurgel",
+    "modelo": "BR-800",
+    "ano": 1990,
+    "placa": "ABC-2554",
+    "cor": "Prata",
+    "valor": 25000.00
+  }
+}
+
+tests {
+  test("deve falhar", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

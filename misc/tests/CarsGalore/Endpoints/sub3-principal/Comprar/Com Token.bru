@@ -1,0 +1,29 @@
+meta {
+  name: Com Token
+  type: http
+  seq: 2
+}
+
+put {
+  url: http://{{principal_service_host}}/comprar/{{veiculo1_placa}}
+  body: none
+  auth: inherit
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("comprador2_bearer_token")}`
+  )
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

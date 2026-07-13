@@ -1,0 +1,32 @@
+meta {
+  name: Inválido
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{compradores_service_host}}/cadastrar
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "cpf": "123.456.789-10",
+    "primeiroNome": "Comprador",
+    "ultimoNome": "Falha",
+    "email": "falha@falha.com",
+    "telefone": "(11) 91234-5678"
+  }
+}
+
+tests {
+  test("deve falhar", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
