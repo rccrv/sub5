@@ -8,11 +8,6 @@ on:
       - 'pom.xml'
       - 'sub3-compradores/**'
       - '.github/workflows/build-sub3-compradores.yml'
-  pull_request:
-    paths:
-      - 'pom.xml'
-      - 'sub3-compradores/**'
-      - '.github/workflows/build-sub3-compradores.yml'
 
 jobs:
   build:

@@ -8,11 +8,6 @@ on:
       - 'pom.xml'
       - 'sub3-principal/**'
       - '.github/workflows/build-sub3-principal.yml'
-  pull_request:
-    paths:
-      - 'pom.xml'
-      - 'sub3-principal/**'
-      - '.github/workflows/build-sub3-principal.yml'
 
 jobs:
   build:
