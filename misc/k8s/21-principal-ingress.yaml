@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: principal-ingress
+  namespace: pos-tech
+spec:
+  rules:
+    - host: principal.agrotera.code.rccrv.nom.br
+      http:
+        paths:
+          - backend:
+              service:
+                name: principal-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

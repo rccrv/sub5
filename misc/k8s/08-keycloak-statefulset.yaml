@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  namespace: pos-tech
+  labels:
+    app: keycloak
+spec:
+  serviceName: keycloak-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.6
+          args: [ "start-dev", "--import-realm" ]
+          ports:
+          - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          env:
+          - name: KC_HOSTNAME
+            value: keycloak.agrotera.code.rccrv.nom.br
+          - name: KC_HTTP_ENABLED
+            value: "true"
+          - name: KC_HOSTNAME_STRICT
+            value: "false"
+          - name: KC_HOSTNAME_STRICT_HTTPS
+            value: "false"
+          - name: KC_HEALTH_ENABLED
+            value: "true"
+          - name: TZ
+            value: "America/Sao_Paulo"
+          - name: KC_BOOTSTRAP_ADMIN_USERNAME
+            value: sub3
+          - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak-secret
+                key: keycloak-password
+          volumeMounts:
+            - name: keycloak-storage
+              mountPath: /opt/keycloak/data
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: keycloak-storage
+          emptyDir: {}
+        - name: realm-import
+          configMap:
+            name: keycloak-configmap

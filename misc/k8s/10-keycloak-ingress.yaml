@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  namespace: pos-tech
+spec:
+  rules:
+    - host: keycloak.agrotera.code.rccrv.nom.br
+      http:
+        paths:
+          - backend:
+              service:
+                name: keycloak-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

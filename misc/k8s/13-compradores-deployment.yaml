@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compradores-deployment
+  namespace: pos-tech
+  labels:
+    app: compradores
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compradores
+  template:
+    metadata:
+      labels:
+        app: compradores
+    spec:
+      imagePullSecrets:
+        - name: "ghcr-secret"
+      containers:
+        - name: compradores
+          image: ghcr.io/rccrv/sub3-compradores:1.0.1
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          env:
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+            - name: QUARKUS_MANAGEMENT_PORT
+              value: "9000"
+            - name: QUARKUS_DATASOURCE_DB_KIND
+              value: "postgresql"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: "sub3"
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: sub3-password
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: "jdbc:postgresql://postgres-loadbalancer:5432/compradores"
+            - name: QUARKUS_HEALTH_ENABLED
+              value: "true"
+            - name: QUARKUS_OIDC_ENABLED
+              value: "true"
+            - name: KEYCLOAK_REALM_URL
+              value: "http://keycloak.agrotera.code.rccrv.nom.br/realms/sub3"
+            - name: KEYCLOAK_CLIENT_ID
+              value: "compradores"
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: compradores-keycloak-credential
+                  key: credential
+            - name: QUARKUS_OIDC_AUTHENTICATION_VERIFY_ACCESS_TOKEN
+              value: "true"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+      restartPolicy: Always
