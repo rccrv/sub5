@@ -19,7 +19,7 @@ spec:
         - name: "ghcr-secret"
       containers:
         - name: principal
-          image: ghcr.io/rccrv/sub3-principal:1.0.1
+          image: ghcr.io/rccrv/sub3-principal:latest
           ports:
             - containerPort: 8080
           readinessProbe:

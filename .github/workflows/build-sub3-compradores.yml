@@ -1,17 +1,11 @@
 name: Build sub3-compradores
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'pom.xml'
-      - 'sub3-compradores/**'
-      - '.github/workflows/build-sub3-compradores.yml'
+  workflow_call:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write

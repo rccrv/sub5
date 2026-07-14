@@ -1,17 +1,11 @@
 name: Build sub3-principal
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'pom.xml'
-      - 'sub3-principal/**'
-      - '.github/workflows/build-sub3-principal.yml'
+  workflow_call:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write

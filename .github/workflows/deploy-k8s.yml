@@ -1,0 +1,39 @@
+name: Build and deploy sub3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pom.xml'
+      - 'sub3-principal/**'
+      - 'sub3-compradores/**'
+      - 'misc/k8s/**'
+      - '.github/workflows/build-sub3-principal.yml'
+      - '.github/workflows/build-sub3-compradores.yml'
+      - '.github/workflows/deploy-k8s.yml'
+
+jobs:
+  build-principal:
+    uses: ./.github/workflows/build-sub3-principal.yml
+
+  build-compradores:
+    uses: ./.github/workflows/build-sub3-compradores.yml
+
+  deploy-k8s:
+    name: Apply Kubernetes manifests
+    runs-on: self-hosted
+    needs:
+      - build-principal
+      - build-compradores
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f misc/k8s
