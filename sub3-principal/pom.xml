@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.nom.rccrv.code</groupId>
     <artifactId>sub3-principal</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>quarkus</packaging>
 
     <properties>

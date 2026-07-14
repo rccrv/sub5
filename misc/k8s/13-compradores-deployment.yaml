@@ -60,6 +60,21 @@ spec:
                 secretKeyRef:
                   name: compradores-keycloak-credential
                   key: credential
+            - name: KEYCLOAK_INSTANCE
+              value: "http://keycloak.agrotera.code.rccrv.nom.br/"
+            - name: KEYCLOAK_ADMIN_AUTH_REALM
+              value: "master"
+            - name: KEYCLOAK_ADMIN_REALM
+              value: "sub3"
+            - name: KEYCLOAK_ADMIN_USERNAME
+              value: "sub3"
+            - name: KEYCLOAK_ADMIN_USER_ID
+              value: "admin-cli"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: compradores-keycloak-credential
+                  key: senha
             - name: QUARKUS_OIDC_AUTHENTICATION_VERIFY_ACCESS_TOKEN
               value: "true"
           resources:
