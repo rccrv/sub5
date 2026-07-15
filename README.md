@@ -141,3 +141,5 @@ Os endpoints serão executados na ordem correta no vídeo de apresentação. Log
 ## Outras informações
 
 Link do vídeo
+
+[Vídeo](https://youtu.be/KW7my4eOKzU)
