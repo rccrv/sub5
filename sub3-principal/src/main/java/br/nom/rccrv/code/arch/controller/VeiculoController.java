@@ -1,59 +1,64 @@
 package br.nom.rccrv.code.arch.controller;
 
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoInputAdapter;
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoOutputAdapter;
-import br.nom.rccrv.code.arch.usecase.veiculo.*;
-import br.nom.rccrv.code.domain.dto.VeiculoReqDto;
-import br.nom.rccrv.code.domain.dto.VeiculoRespDto;
-import br.nom.rccrv.code.infrastructure.persistence.repository.VeiculoRepository;
-import jakarta.ws.rs.NotFoundException;
+import br.nom.rccrv.code.arch.entity.VeiculoEntity;
+import br.nom.rccrv.code.arch.port.repository.VeiculoRepositoryPort;
+import br.nom.rccrv.code.arch.usecase.veiculo.CadastrarVeiculoInteractorImpl;
+import br.nom.rccrv.code.arch.usecase.veiculo.ComprarVeiculoInteractorImpl;
+import br.nom.rccrv.code.arch.usecase.veiculo.EditarVeiculoInteractorImpl;
+import br.nom.rccrv.code.arch.usecase.veiculo.ListarVeiculosAVendaInteractorImpl;
+import br.nom.rccrv.code.arch.usecase.veiculo.ListarVeiculosVendidosInteractorImpl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class VeiculoController {
 
-    VeiculoRepository veiculoRepository;
+    private final VeiculoRepositoryPort veiculoRepositoryPort;
 
-    public VeiculoController(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
+    public VeiculoController(VeiculoRepositoryPort veiculoRepositoryPort) {
+        this.veiculoRepositoryPort = veiculoRepositoryPort;
     }
 
-    public VeiculoRespDto cadastrar(VeiculoReqDto req) {
-        var interactor = CadastrarVeiculoInteractorImpl.factory(veiculoRepository);
-        var veiculoEntity = VeiculoInputAdapter.deReqDto(req);
+    public VeiculoEntity cadastrar(VeiculoEntity veiculoEntity) {
+        var interactor = CadastrarVeiculoInteractorImpl.factory(veiculoRepositoryPort);
 
-        return VeiculoOutputAdapter.paraRespDto(interactor.cadastrar(veiculoEntity));
+        return interactor.cadastrar(veiculoEntity);
     }
 
-    public VeiculoRespDto atualizar(
-            String placa,
-            VeiculoReqDto req
-    ) {
-        var interactor = EditarVeiculoInteractorImpl.factory(veiculoRepository);
+    public Optional<VeiculoEntity> atualizar(String placa, VeiculoEntity veiculoEntity) {
+        var interactor = EditarVeiculoInteractorImpl.factory(veiculoRepositoryPort);
 
-        return VeiculoOutputAdapter.paraRespDto(
-            interactor.editar(placa, VeiculoInputAdapter.deReqDto(req))
-                .orElseThrow(() -> new NotFoundException("Veículo não encontrado"))
-        );
+        return interactor.editar(placa, veiculoEntity);
     }
 
-    public List<VeiculoRespDto> listarVeiculosAVenda() {
-        var interactor = ListarVeiculosAVendaInteractorImpl.factory(veiculoRepository);
+    public List<VeiculoEntity> listarVeiculosAVenda() {
+        var interactor = ListarVeiculosAVendaInteractorImpl.factory(veiculoRepositoryPort);
 
-        return interactor.listar().stream().map(VeiculoOutputAdapter::paraRespDto).toList();
+        return interactor.listar();
     }
 
-    public List<VeiculoRespDto> listarVeiculosVendidos() {
-        var interactor = ListarVeiculosVendidosInteractorImpl.factory(veiculoRepository);
+    public List<VeiculoEntity> listarVeiculosVendidos() {
+        var interactor = ListarVeiculosVendidosInteractorImpl.factory(veiculoRepositoryPort);
 
-        return interactor.listar().stream().map(VeiculoOutputAdapter::paraRespDto).toList();
+        return interactor.listar();
     }
 
-    public VeiculoRespDto comprar(String placa, String cpf) {
-        var interactor = ComprarVeiculoInteractorImpl.factory(veiculoRepository);
+    public Optional<VeiculoEntity> comprar(String placa, String cpf) {
+        var interactor = ComprarVeiculoInteractorImpl.factory(veiculoRepositoryPort);
 
-        return VeiculoOutputAdapter.paraRespDto(
-            interactor.comprar(placa, cpf).orElseThrow(() -> new NotFoundException("Veículo não encontrado"))
-        );
+        return interactor.comprar(placa, cpf);
+    }
+
+    public Optional<VeiculoEntity> comprar(String placa, String cpf, UUID pagamentoId) {
+        var interactor = ComprarVeiculoInteractorImpl.factory(veiculoRepositoryPort);
+
+        return interactor.comprar(placa, cpf, pagamentoId);
+    }
+
+    public boolean rollbackCompra(String placa, UUID pagamentoId) {
+        var interactor = ComprarVeiculoInteractorImpl.factory(veiculoRepositoryPort);
+
+        return interactor.rollback(placa, pagamentoId);
     }
 }

@@ -38,4 +38,16 @@ final public class AutorizarCompradorInteractorImpl implements AutorizarComprado
 
         return Optional.of(compradorRepository.save(comprador.get()));
     }
+
+    public void rollbackAutorizar(String cpf) {
+        var comprador = compradorRepository.findByCpf(cpf);
+
+        if (comprador.isEmpty()) {
+            return;
+        }
+
+        comprador.get().setAutorizado(false);
+
+        createUserAuthServicePort.rollbackCriarComprador(cpf);
+    }
 }

@@ -7,4 +7,5 @@ import java.util.Optional;
 public sealed interface AutorizarCompradorInteractor permits AutorizarCompradorInteractorImpl {
 
     Optional<CompradorEntity> autorizar(String cpf);
+    void rollbackAutorizar(String cpf);
 }

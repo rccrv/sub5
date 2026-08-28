@@ -1,18 +1,17 @@
 package br.nom.rccrv.code.arch.usecase.veiculo;
 
 import br.nom.rccrv.code.arch.entity.VeiculoEntity;
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoInputAdapter;
-import br.nom.rccrv.code.infrastructure.persistence.repository.VeiculoRepository;
+import br.nom.rccrv.code.arch.port.repository.VeiculoRepositoryPort;
 
 import java.util.Optional;
 
 final public class EditarVeiculoInteractorImpl implements EditarVeiculoInteractor {
 
-    VeiculoRepository veiculoRepository;
+    VeiculoRepositoryPort veiculoRepository;
 
     private EditarVeiculoInteractorImpl() {}
 
-    public static EditarVeiculoInteractor factory(VeiculoRepository veiculoRepository) {
+    public static EditarVeiculoInteractor factory(VeiculoRepositoryPort veiculoRepository) {
         var interactor = new EditarVeiculoInteractorImpl();
 
         interactor.veiculoRepository = veiculoRepository;
@@ -21,24 +20,22 @@ final public class EditarVeiculoInteractorImpl implements EditarVeiculoInteracto
     }
 
     public Optional<VeiculoEntity> editar(String placa, VeiculoEntity veiculoEntity) {
-        var jpaEntityOpt = Optional.ofNullable(veiculoRepository.findByPlaca(placa));
+        var veiculoOpt = veiculoRepository.findByPlaca(placa);
 
-        if (jpaEntityOpt.isEmpty()) {
+        if (veiculoOpt.isEmpty()) {
             return Optional.empty();
         }
 
-        var jpaEntity = jpaEntityOpt.get();
+        var veiculo = veiculoOpt.get();
 
-        jpaEntity.setMarca(veiculoEntity.getMarca());
-        jpaEntity.setModelo(veiculoEntity.getModelo());
-        jpaEntity.setAno(veiculoEntity.getAno());
-        jpaEntity.setCor(veiculoEntity.getCor());
-        jpaEntity.setValor(veiculoEntity.getValor());
-        jpaEntity.setCompradorCpf(veiculoEntity.getCompradorCpf());
-        jpaEntity.setVendido(veiculoEntity.getVendido());
+        veiculo.setMarca(veiculoEntity.getMarca());
+        veiculo.setModelo(veiculoEntity.getModelo());
+        veiculo.setAno(veiculoEntity.getAno());
+        veiculo.setCor(veiculoEntity.getCor());
+        veiculo.setValor(veiculoEntity.getValor());
+        veiculo.setCompradorCpf(veiculoEntity.getCompradorCpf());
+        veiculo.setVendido(veiculoEntity.getVendido());
 
-        veiculoRepository.update(jpaEntity);
-
-        return Optional.of(VeiculoInputAdapter.deJpa(jpaEntity));
+        return Optional.of(veiculoRepository.save(veiculo));
     }
 }

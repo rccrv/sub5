@@ -1,6 +1,7 @@
 package br.nom.rccrv.code.arch.entity;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public class VeiculoEntity {
 
@@ -12,6 +13,7 @@ public class VeiculoEntity {
     private String cor;
     private BigDecimal valor;
     private String compradorCpf;
+    private UUID pagamentoId;
     private Boolean vendido;
 
     public VeiculoEntity(VeiculoId veiculoId) {
@@ -102,6 +104,14 @@ public class VeiculoEntity {
 
     public void setCompradorCpf(String compradorCpf) {
         this.compradorCpf = compradorCpf;
+    }
+
+    public UUID getPagamentoId() {
+        return pagamentoId;
+    }
+
+    public void setPagamentoId(UUID pagamentoId) {
+        this.pagamentoId = pagamentoId;
     }
 
     public Boolean getVendido() {

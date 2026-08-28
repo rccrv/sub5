@@ -22,4 +22,8 @@ final public class CadastrarCompradorInteractorImpl implements CadastrarComprado
     public CompradorEntity cadastrar(CompradorEntity compradorEntity) {
         return compradorRepository.save(compradorEntity);
     }
+
+    public void rollbackCadastrar(CompradorEntity compradorEntity) {
+        compradorRepository.rollbackSave(compradorEntity);
+    }
 }

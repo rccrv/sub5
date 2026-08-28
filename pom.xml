@@ -3,11 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.nom.rccrv.code</groupId>
     <artifactId>sub3</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>sub3-principal</module>
         <module>sub3-compradores</module>
+        <module>sub3-orquestrador</module>
+        <module>sub3-financeiro</module>
     </modules>
 </project>

@@ -1,39 +1,38 @@
 package br.nom.rccrv.code.arch.usecase.veiculo;
 
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoInputAdapter;
 import br.nom.rccrv.code.arch.entity.VeiculoEntity;
-import br.nom.rccrv.code.infrastructure.persistence.repository.VeiculoRepository;
-
+import br.nom.rccrv.code.arch.port.repository.VeiculoRepositoryPort;
 import java.util.Optional;
+import java.util.UUID;
 
-final public class ComprarVeiculoInteractorImpl implements ComprarVeiculoInteractor {
+public final class ComprarVeiculoInteractorImpl implements ComprarVeiculoInteractor {
 
-    private VeiculoRepository veiculoRepository;
+  private final VeiculoRepositoryPort repository;
 
-    private ComprarVeiculoInteractorImpl() {}
+  private ComprarVeiculoInteractorImpl(VeiculoRepositoryPort repository) {
+    this.repository = repository;
+  }
 
-    public static ComprarVeiculoInteractor factory(VeiculoRepository veiculoRepository) {
-        var interactor = new ComprarVeiculoInteractorImpl();
+  public static ComprarVeiculoInteractor factory(VeiculoRepositoryPort repository) {
+    return new ComprarVeiculoInteractorImpl(repository);
+  }
 
-        interactor.veiculoRepository = veiculoRepository;
+  @Override
+  public Optional<VeiculoEntity> comprar(String placa, String cpf) {
+    return comprar(placa, cpf, null);
+  }
 
-        return interactor;
+  @Override
+  public Optional<VeiculoEntity> comprar(String placa, String cpf, UUID pagamentoId) {
+    if (!repository.sellIfAvailable(placa, cpf, pagamentoId)) {
+      return Optional.empty();
     }
 
-    public Optional<VeiculoEntity> comprar(String placa, String cpf) {
-        var jpaEntityOpt = Optional.ofNullable(veiculoRepository.findByPlaca(placa));
+    return repository.findByPlaca(placa);
+  }
 
-        if (jpaEntityOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        var jpaEntity = jpaEntityOpt.get();
-
-        jpaEntity.setCompradorCpf(cpf);
-        jpaEntity.setVendido(true);
-
-        veiculoRepository.update(jpaEntity);
-
-        return Optional.of(VeiculoInputAdapter.deJpa(jpaEntity));
-    }
+  @Override
+  public boolean rollback(String placa, UUID pagamentoId) {
+    return repository.rollbackSale(placa, pagamentoId);
+  }
 }

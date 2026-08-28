@@ -25,20 +25,20 @@ public class KeycloakAdminClient implements CreateUserAuthServicePort {
     public KeycloakAdminClient(KeycloakAdminConfig config) {
         this.config = config;
         this.keycloak = Keycloak.getInstance(
-                config.instance(),
-                config.authRealm(),
-                config.user(),
-                config.password(),
-                config.clientId()
+            config.instance(),
+            config.authRealm(),
+            config.user(),
+            config.password(),
+            config.clientId()
         );
     }
 
     public String criarComprador(String username) {
         UsersResource usersResource = keycloak.realm(config.realm()).users();
         RoleRepresentation compradorRole = keycloak.realm(config.realm())
-                .roles()
-                .get("comprador")
-                .toRepresentation();
+            .roles()
+            .get("comprador")
+            .toRepresentation();
 
         List<UserRepresentation> existingUsers = usersResource.searchByUsername(username, true);
         if (!existingUsers.isEmpty()) {
@@ -58,7 +58,18 @@ public class KeycloakAdminClient implements CreateUserAuthServicePort {
         try (Response response = usersResource.create(user)) {
             if (response.getStatus() == Response.Status.CREATED.getStatusCode()) {
                 String userId = CreatedResponseUtil.getCreatedId(response);
-                usersResource.get(userId).roles().realmLevel().add(List.of(compradorRole));
+
+                try {
+                    usersResource.get(userId).roles().realmLevel().add(List.of(compradorRole));
+                } catch (RuntimeException exception) {
+                    try {
+                        rollbackCriarComprador(userId);
+                    } catch (RuntimeException rollbackException) {
+                        exception.addSuppressed(rollbackException);
+                    }
+                    throw exception;
+                }
+
                 return userId;
             }
 
@@ -68,9 +79,27 @@ public class KeycloakAdminClient implements CreateUserAuthServicePort {
             }
 
             throw new WebApplicationException(
-                    "Falhou ao criar o usuário. Status: " + response.getStatus(),
-                    response.getStatus()
+                "Falhou ao criar o usuário. Status: " + response.getStatus(),
+                response.getStatus()
             );
+        }
+    }
+
+    @Override
+    public void rollbackCriarComprador(String userId) {
+        UsersResource usersResource = keycloak.realm(config.realm()).users();
+
+        try (Response response = usersResource.delete(userId)) {
+            int status = response.getStatus();
+            boolean deleted = response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL;
+            boolean alreadyDeleted = status == Response.Status.NOT_FOUND.getStatusCode();
+
+            if (!deleted && !alreadyDeleted) {
+                throw new WebApplicationException(
+                    "Falhou ao desfazer a criação do usuário. Status: " + status,
+                    status
+                );
+            }
         }
     }
 }

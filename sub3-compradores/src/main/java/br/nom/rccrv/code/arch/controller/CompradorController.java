@@ -19,6 +19,14 @@ public class CompradorController {
         this.compradorRepositoryPort = compradorRepositoryPort;
     }
 
+    public CompradorController(
+        CompradorRepositoryPort compradorRepositoryPort,
+        CreateUserAuthServicePort createUserAuthServicePort
+    ) {
+        this.compradorRepositoryPort = compradorRepositoryPort;
+        this.createUserAuthServicePort = createUserAuthServicePort;
+    }
+
     public void setCreateUserAuthServicePort(CreateUserAuthServicePort createUserAuthServicePort) {
         this.createUserAuthServicePort = createUserAuthServicePort;
     }
@@ -29,6 +37,12 @@ public class CompradorController {
         return interactor.cadastrar(compradorEntity);
     }
 
+    public void rollbackCadastrar(CompradorEntity compradorEntity) {
+        var interactor = CadastrarCompradorInteractorImpl.factory(compradorRepositoryPort);
+
+        interactor.rollbackCadastrar(compradorEntity);
+    }
+
     public List<CompradorEntity> listar() {
         var interactor = ListarCompradoresParaAutorizarInteractorImpl.factory(compradorRepositoryPort);
 
@@ -36,11 +50,14 @@ public class CompradorController {
     }
 
     public Optional<CompradorEntity> autorizar(String cpf) {
-        var interactor = AutorizarCompradorInteractorImpl.factory(
-            compradorRepositoryPort,
-            createUserAuthServicePort
-        );
+        var interactor = AutorizarCompradorInteractorImpl.factory(compradorRepositoryPort, createUserAuthServicePort);
 
         return interactor.autorizar(cpf);
+    }
+
+    public void rollbackAutorizar(String cpf) {
+        var interactor = AutorizarCompradorInteractorImpl.factory(compradorRepositoryPort, createUserAuthServicePort);
+
+        interactor.rollbackAutorizar(cpf);
     }
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface CompradorRepositoryPort {
 
     CompradorEntity save(CompradorEntity comprador);
+    void rollbackSave(CompradorEntity comprador);
     Optional<CompradorEntity> findByCpf(String cpf);
     List<CompradorEntity> findUnauthorized();
 }

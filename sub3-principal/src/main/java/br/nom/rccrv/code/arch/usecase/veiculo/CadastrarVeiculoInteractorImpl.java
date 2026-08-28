@@ -1,17 +1,15 @@
 package br.nom.rccrv.code.arch.usecase.veiculo;
 
 import br.nom.rccrv.code.arch.entity.VeiculoEntity;
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoInputAdapter;
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoOutputAdapter;
-import br.nom.rccrv.code.infrastructure.persistence.repository.VeiculoRepository;
+import br.nom.rccrv.code.arch.port.repository.VeiculoRepositoryPort;
 
 final public class CadastrarVeiculoInteractorImpl implements CadastrarVeiculoInteractor {
 
-    VeiculoRepository veiculoRepository;
+    VeiculoRepositoryPort veiculoRepository;
 
     private CadastrarVeiculoInteractorImpl() {}
 
-    public static CadastrarVeiculoInteractor factory(VeiculoRepository veiculoRepository) {
+    public static CadastrarVeiculoInteractor factory(VeiculoRepositoryPort veiculoRepository) {
         var interactor = new CadastrarVeiculoInteractorImpl();
 
         interactor.veiculoRepository = veiculoRepository;
@@ -20,8 +18,6 @@ final public class CadastrarVeiculoInteractorImpl implements CadastrarVeiculoInt
     }
 
     public VeiculoEntity cadastrar(VeiculoEntity veiculoEntity) {
-        var veiculoJpa = VeiculoOutputAdapter.paraJpa(veiculoEntity);
-
-        return VeiculoInputAdapter.deJpa(veiculoRepository.insert(veiculoJpa));
+        return veiculoRepository.save(veiculoEntity);
     }
 }

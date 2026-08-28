@@ -35,6 +35,10 @@ public class Veiculo {
     @Column(name = "comprador_cpf")
     private String compradorCpf;
 
+    /** The exact payment that settled this sale; required for safe compensation. */
+    @Column(name = "pagamento_id")
+    private UUID pagamentoId;
+
     @Column(name = "vendido")
     private Boolean vendido;
 
@@ -100,6 +104,14 @@ public class Veiculo {
 
     public void setCompradorCpf(String compradorCpf) {
         this.compradorCpf = compradorCpf;
+    }
+
+    public UUID getPagamentoId() {
+        return pagamentoId;
+    }
+
+    public void setPagamentoId(UUID pagamentoId) {
+        this.pagamentoId = pagamentoId;
     }
 
     public Boolean getVendido() {

@@ -1,18 +1,17 @@
 package br.nom.rccrv.code.arch.usecase.veiculo;
 
 import br.nom.rccrv.code.arch.entity.VeiculoEntity;
-import br.nom.rccrv.code.arch.adapter.veiculo.VeiculoInputAdapter;
-import br.nom.rccrv.code.infrastructure.persistence.repository.VeiculoRepository;
+import br.nom.rccrv.code.arch.port.repository.VeiculoRepositoryPort;
 
 import java.util.List;
 
 final public class ListarVeiculosVendidosInteractorImpl implements ListarVeiculosVendidosInteractor {
 
-    private VeiculoRepository veiculoRepository;
+    private VeiculoRepositoryPort veiculoRepository;
 
     private ListarVeiculosVendidosInteractorImpl() {}
 
-    public static ListarVeiculosVendidosInteractor factory(VeiculoRepository veiculoRepository) {
+    public static ListarVeiculosVendidosInteractor factory(VeiculoRepositoryPort veiculoRepository) {
         var interactor = new ListarVeiculosVendidosInteractorImpl();
 
         interactor.veiculoRepository = veiculoRepository;
@@ -21,6 +20,6 @@ final public class ListarVeiculosVendidosInteractorImpl implements ListarVeiculo
     }
 
     public List<VeiculoEntity> listar() {
-        return veiculoRepository.listarVeiculosVendidos().stream().map(VeiculoInputAdapter::deJpa).toList();
+        return veiculoRepository.findSold();
     }
 }
