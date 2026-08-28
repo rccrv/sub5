@@ -1,59 +1,46 @@
 package br.nom.rccrv.code.arch.controller;
 
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorInputAdapter;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorOutputAdapter;
+import br.nom.rccrv.code.arch.entity.CompradorEntity;
+import br.nom.rccrv.code.arch.port.repository.CompradorRepositoryPort;
+import br.nom.rccrv.code.arch.port.service.CreateUserAuthServicePort;
 import br.nom.rccrv.code.arch.usecase.comprador.AutorizarCompradorInteractorImpl;
 import br.nom.rccrv.code.arch.usecase.comprador.CadastrarCompradorInteractorImpl;
 import br.nom.rccrv.code.arch.usecase.comprador.ListarCompradoresParaAutorizarInteractorImpl;
-import br.nom.rccrv.code.domain.dto.CompradorReqDto;
-import br.nom.rccrv.code.domain.dto.CompradorRespDto;
-import br.nom.rccrv.code.infrastructure.keycloak.KeycloakAdminClient;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
-import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CompradorController {
 
-    CompradorRepository compradorRepository;
-    KeycloakAdminClient keycloakAdminController;
+    private final CompradorRepositoryPort compradorRepositoryPort;
+    private CreateUserAuthServicePort createUserAuthServicePort;
 
-    public CompradorController(CompradorRepository compradorRepository) {
-        this.compradorRepository = compradorRepository;
+    public CompradorController(CompradorRepositoryPort compradorRepositoryPort) {
+        this.compradorRepositoryPort = compradorRepositoryPort;
     }
 
-    public void setKeycloakAdminController(KeycloakAdminClient keycloakAdminController) {
-        this.keycloakAdminController = keycloakAdminController;
+    public void setCreateUserAuthServicePort(CreateUserAuthServicePort createUserAuthServicePort) {
+        this.createUserAuthServicePort = createUserAuthServicePort;
     }
 
-    public CompradorRespDto cadastrar(CompradorReqDto req) {
-        var interactor = CadastrarCompradorInteractorImpl.factory(compradorRepository);
-        var compradorEntity = CompradorInputAdapter.deReqDto(req);
+    public CompradorEntity cadastrar(CompradorEntity compradorEntity) {
+        var interactor = CadastrarCompradorInteractorImpl.factory(compradorRepositoryPort);
 
-        return CompradorOutputAdapter.paraRespDto(interactor.cadastrar(compradorEntity));
+        return interactor.cadastrar(compradorEntity);
     }
 
-    public List<CompradorRespDto> listar() {
-        var interactor = ListarCompradoresParaAutorizarInteractorImpl.factory(compradorRepository);
+    public List<CompradorEntity> listar() {
+        var interactor = ListarCompradoresParaAutorizarInteractorImpl.factory(compradorRepositoryPort);
 
-        return interactor.listar().stream().map(CompradorOutputAdapter::paraRespDto).toList();
+        return interactor.listar();
     }
 
-    public CompradorRespDto autorizar(String cpf) {
-        var interactor = AutorizarCompradorInteractorImpl.factory(compradorRepository, keycloakAdminController);
-        var cpfNormalizado = cpf.replaceAll("\\D", "");
-        var cpfDigitos = cpfNormalizado
-            .chars()
-            .mapToObj(c -> c - '0')
-            .toList();
-        var cpfValido = CompradorReqDto.cpfValido(cpfDigitos);
-
-        if (!cpfValido) {
-            throw new IllegalArgumentException("CPF inválido");
-        }
-
-        return CompradorOutputAdapter.paraRespDto(
-            interactor.autorizar(cpfNormalizado).orElseThrow(() -> new NotFoundException("Comprador não encontrado"))
+    public Optional<CompradorEntity> autorizar(String cpf) {
+        var interactor = AutorizarCompradorInteractorImpl.factory(
+            compradorRepositoryPort,
+            createUserAuthServicePort
         );
+
+        return interactor.autorizar(cpf);
     }
 }

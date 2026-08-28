@@ -1,10 +1,9 @@
 package br.nom.rccrv.code.endpoint.comprador;
 
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorInputAdapter;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorOutputAdapter;
 import br.nom.rccrv.code.container.TestcontainerManager;
 import br.nom.rccrv.code.domain.dto.CompradorReqDto;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
+import br.nom.rccrv.code.infrastructure.persistence.entity.Comprador;
 import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
 import br.nom.rccrv.code.utils.TestUtils;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -35,9 +34,7 @@ public class AutorizarCompradorEndpointTest {
         );
 
         var compradorJpa = compradorRepository.insert(
-            CompradorOutputAdapter.paraJpa(
-                CompradorInputAdapter.deReqDto(comprador)
-            )
+            compradorJpa(comprador)
         );
 
         RestAssured.given()
@@ -63,9 +60,7 @@ public class AutorizarCompradorEndpointTest {
         );
 
         var compradorJpa = compradorRepository.insert(
-            CompradorOutputAdapter.paraJpa(
-                CompradorInputAdapter.deReqDto(comprador)
-            )
+            compradorJpa(comprador)
         );
 
         var resp = RestAssured.given()
@@ -84,5 +79,16 @@ public class AutorizarCompradorEndpointTest {
         Assertions.assertTrue(resp.autorizado());
 
         compradorRepository.delete(compradorJpa);
+    }
+
+    private static Comprador compradorJpa(CompradorReqDto dto) {
+        var entity = new Comprador();
+        entity.setCpf(dto.cpf());
+        entity.setPrimeiroNome(dto.primeiroNome());
+        entity.setUltimoNome(dto.ultimoNome());
+        entity.setEmail(dto.email());
+        entity.setTelefone(dto.telefone());
+        entity.setAutorizado(false);
+        return entity;
     }
 }

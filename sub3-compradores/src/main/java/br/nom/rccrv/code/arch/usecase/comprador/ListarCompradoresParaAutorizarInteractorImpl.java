@@ -1,18 +1,17 @@
 package br.nom.rccrv.code.arch.usecase.comprador;
 
 import br.nom.rccrv.code.arch.entity.CompradorEntity;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorInputAdapter;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.arch.port.repository.CompradorRepositoryPort;
 
 import java.util.List;
 
 final public class ListarCompradoresParaAutorizarInteractorImpl implements ListarCompradoresParaAutorizarInteractor {
 
-    private CompradorRepository compradorRepository;
+    private CompradorRepositoryPort compradorRepository;
 
     private ListarCompradoresParaAutorizarInteractorImpl() {}
 
-    public static ListarCompradoresParaAutorizarInteractor factory(CompradorRepository compradorRepository) {
+    public static ListarCompradoresParaAutorizarInteractor factory(CompradorRepositoryPort compradorRepository) {
         var interactor = new ListarCompradoresParaAutorizarInteractorImpl();
 
         interactor.compradorRepository = compradorRepository;
@@ -21,6 +20,6 @@ final public class ListarCompradoresParaAutorizarInteractorImpl implements Lista
     }
 
     public List<CompradorEntity> listar() {
-        return compradorRepository.listarCompradoresParaAutorizar().stream().map(CompradorInputAdapter::deJpa).toList();
+        return compradorRepository.findUnauthorized();
     }
 }

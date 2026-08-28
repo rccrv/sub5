@@ -1,23 +1,22 @@
-package br.nom.rccrv.code.arch.adapter.comprador;
+package br.nom.rccrv.code.domain.mapper;
 
 import br.nom.rccrv.code.arch.entity.CompradorEntity;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
 import br.nom.rccrv.code.infrastructure.persistence.entity.Comprador;
 
-public class CompradorOutputAdapter {
+public final class CompradorOutputMapper {
 
-    private CompradorOutputAdapter() {}
+    private CompradorOutputMapper() {}
 
     public static Comprador paraJpa(CompradorEntity entity) {
         var jpaEntity = new Comprador();
-
+        jpaEntity.setId(entity.getCompradorId().getId());
         jpaEntity.setCpf(entity.getCpf());
         jpaEntity.setPrimeiroNome(entity.getPrimeiroNome());
         jpaEntity.setUltimoNome(entity.getUltimoNome());
         jpaEntity.setEmail(entity.getEmail());
         jpaEntity.setTelefone(entity.getTelefone());
         jpaEntity.setAutorizado(entity.getAutorizado());
-
         return jpaEntity;
     }
 

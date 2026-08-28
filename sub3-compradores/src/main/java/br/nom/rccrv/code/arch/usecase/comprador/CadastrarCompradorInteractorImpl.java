@@ -1,18 +1,16 @@
 package br.nom.rccrv.code.arch.usecase.comprador;
 
 import br.nom.rccrv.code.arch.entity.CompradorEntity;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorInputAdapter;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorOutputAdapter;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.arch.port.repository.CompradorRepositoryPort;
 
 final public class CadastrarCompradorInteractorImpl implements CadastrarCompradorInteractor {
 
-    private CompradorRepository compradorRepository;
+    private CompradorRepositoryPort compradorRepository;
 
     private CadastrarCompradorInteractorImpl() {}
 
     public static CadastrarCompradorInteractor factory(
-            CompradorRepository compradorRepository
+            CompradorRepositoryPort compradorRepository
     ) {
         var interactor = new CadastrarCompradorInteractorImpl();
 
@@ -22,8 +20,6 @@ final public class CadastrarCompradorInteractorImpl implements CadastrarComprado
     }
 
     public CompradorEntity cadastrar(CompradorEntity compradorEntity) {
-        var compradorJpa = CompradorOutputAdapter.paraJpa(compradorEntity);
-
-        return CompradorInputAdapter.deJpa(compradorRepository.insert(compradorJpa));
+        return compradorRepository.save(compradorEntity);
     }
 }

@@ -1,43 +1,41 @@
 package br.nom.rccrv.code.arch.usecase.comprador;
 
 import br.nom.rccrv.code.arch.entity.CompradorEntity;
-import br.nom.rccrv.code.arch.adapter.comprador.CompradorInputAdapter;
-import br.nom.rccrv.code.infrastructure.keycloak.KeycloakAdminClient;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.arch.port.repository.CompradorRepositoryPort;
+import br.nom.rccrv.code.arch.port.service.CreateUserAuthServicePort;
 
 import java.util.Optional;
 
 final public class AutorizarCompradorInteractorImpl implements AutorizarCompradorInteractor {
 
-    private CompradorRepository compradorRepository;
-    private KeycloakAdminClient keycloakAdminController;
+    private CompradorRepositoryPort compradorRepository;
+    private CreateUserAuthServicePort createUserAuthServicePort;
 
     private AutorizarCompradorInteractorImpl() {}
 
     public static AutorizarCompradorInteractor factory(
-            CompradorRepository compradorRepository,
-            KeycloakAdminClient keycloakAdminController
+            CompradorRepositoryPort compradorRepository,
+            CreateUserAuthServicePort keycloakAdminController
     ) {
         var interactor = new AutorizarCompradorInteractorImpl();
 
         interactor.compradorRepository = compradorRepository;
-        interactor.keycloakAdminController = keycloakAdminController;
+        interactor.createUserAuthServicePort = keycloakAdminController;
 
         return interactor;
     }
 
     public Optional<CompradorEntity> autorizar(String cpf) {
-        var compradorJpa = Optional.ofNullable(compradorRepository.findByCpf(cpf));
+        var comprador = compradorRepository.findByCpf(cpf);
 
-        if (compradorJpa.isEmpty()) {
+        if (comprador.isEmpty()) {
             return Optional.empty();
         }
 
-        keycloakAdminController.criarComprador(cpf);
+        createUserAuthServicePort.criarComprador(cpf);
 
-        compradorJpa.get().setAutorizado(true);
-        compradorRepository.update(compradorJpa.get());
+        comprador.get().setAutorizado(true);
 
-        return Optional.of(CompradorInputAdapter.deJpa(compradorRepository.findByCpf(cpf)));
+        return Optional.of(compradorRepository.save(comprador.get()));
     }
 }

@@ -1,15 +1,18 @@
 package br.nom.rccrv.code.endpoint.comprador;
 
 import br.nom.rccrv.code.arch.controller.CompradorController;
+import br.nom.rccrv.code.domain.dto.CompradorReqDto;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
+import br.nom.rccrv.code.domain.mapper.CompradorOutputMapper;
 import br.nom.rccrv.code.infrastructure.keycloak.KeycloakAdminClient;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.infrastructure.persistence.adapter.CompradorRepositoryAdapter;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
@@ -25,19 +28,19 @@ import org.jboss.resteasy.reactive.RestResponse;
 @Path("/autorizar")
 public class AutorizarCompradorEndpoint {
 
-    CompradorRepository compradorRepository;
+    CompradorRepositoryAdapter compradorRepository;
     KeycloakAdminClient keycloakAdminController;
     CompradorController controller;
 
     @Inject
     public AutorizarCompradorEndpoint(
-        CompradorRepository compradorRepository,
+        CompradorRepositoryAdapter compradorRepository,
         KeycloakAdminClient keycloakAdminController
     ) {
         this.compradorRepository = compradorRepository;
         this.keycloakAdminController = keycloakAdminController;
         this.controller = new CompradorController(compradorRepository);
-        this.controller.setKeycloakAdminController(keycloakAdminController);
+        this.controller.setCreateUserAuthServicePort(keycloakAdminController);
     }
 
     @Operation(
@@ -69,7 +72,19 @@ public class AutorizarCompradorEndpoint {
             @Parameter(description = "CPF do comprador", required = true)
             @PathParam("cpf") String cpf
     ) {
-        var resp = controller.autorizar(cpf);
+        var cpfNormalizado = cpf.replaceAll("\\D", "");
+        var cpfDigitos = cpfNormalizado
+            .chars()
+            .mapToObj(c -> c - '0')
+            .toList();
+
+        if (!CompradorReqDto.cpfValido(cpfDigitos)) {
+            throw new IllegalArgumentException("CPF inválido");
+        }
+
+        var resp = controller.autorizar(cpfNormalizado)
+            .map(CompradorOutputMapper::paraRespDto)
+            .orElseThrow(() -> new NotFoundException("Comprador não encontrado"));
 
         return RestResponse.ok(resp);
     }

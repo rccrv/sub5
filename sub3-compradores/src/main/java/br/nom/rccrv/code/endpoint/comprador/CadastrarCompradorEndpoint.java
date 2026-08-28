@@ -3,7 +3,9 @@ package br.nom.rccrv.code.endpoint.comprador;
 import br.nom.rccrv.code.arch.controller.CompradorController;
 import br.nom.rccrv.code.domain.dto.CompradorReqDto;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.domain.mapper.CompradorInputMapper;
+import br.nom.rccrv.code.domain.mapper.CompradorOutputMapper;
+import br.nom.rccrv.code.infrastructure.persistence.adapter.CompradorRepositoryAdapter;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -24,11 +26,11 @@ import org.jboss.resteasy.reactive.RestResponse;
 @Path("/cadastrar")
 public class CadastrarCompradorEndpoint {
 
-    CompradorRepository compradorRepository;
+    CompradorRepositoryAdapter compradorRepository;
     CompradorController controller;
 
     @Inject
-    public CadastrarCompradorEndpoint(CompradorRepository compradorRepository) {
+    public CadastrarCompradorEndpoint(CompradorRepositoryAdapter compradorRepository) {
         this.compradorRepository = compradorRepository;
         this.controller = new CompradorController(compradorRepository);
     }
@@ -57,7 +59,9 @@ public class CadastrarCompradorEndpoint {
     @Transactional
     @RunOnVirtualThread
     public RestResponse<CompradorRespDto> cadastrar(@Valid CompradorReqDto req) {
-        var resp = controller.cadastrar(req);
+        var resp = CompradorOutputMapper.paraRespDto(
+            controller.cadastrar(CompradorInputMapper.deReqDto(req))
+        );
 
         return RestResponse.status(Response.Status.CREATED, resp);
     }

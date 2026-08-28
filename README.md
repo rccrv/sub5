@@ -88,10 +88,10 @@ veiculos (bd principal):
 #### Sistema compradores
 
 | Endpoint         | Método | Role        |
-|------------------|-------|-------------|
-| /cadastrar       | POST  |             |
-| /listar          | GET   | funcionario |
-| /autorizar/{cpf} | PUT   | funcionario |
+|------------------|--------|-------------|
+| /cadastrar       | POST   |             |
+| /listar          | GET    | funcionario |
+| /autorizar/{cpf} | PUT    | funcionario |
 
 #### Sistema principal
 
@@ -114,12 +114,12 @@ docker compose up -d
 
 Depois necessário rodar os dois subprojetos (sub3-compradores e sub3-principal) em desenvolvimento, um em cada terminal:
 
-```
+```shell
 cd sub3-compradores
 mvn quarkus:dev
 ```
 
-```
+```shell
 cd sub3-principal
 mvn quarkus:dev
 ```
@@ -133,7 +133,7 @@ Para testar o sistema, basta rodar ele localmente. E abrir o conteúdo da pasta 
 [Bruno](https://www.usebruno.com/). Os endpoints listados acima têm testes os testes necessários com validação onde
 essa se faz necessária (validação de CPF e máscara de placa de carro padrão Mercosul).
 
-**Importate**: é necessário usar o environment dev quando se roda localmente. O vídeo vai mostrar a execução no
+**Importante**: é necessário usar o environment dev quando se roda localmente. O vídeo vai mostrar a execução no
 environment prod
 
 Os endpoints serão executados na ordem correta no vídeo de apresentação. Logo a sugestão é acompanhar por lá. 

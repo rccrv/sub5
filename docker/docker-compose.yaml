@@ -31,3 +31,10 @@ services:
       - "8080:8080"
     volumes:
       - ./sub3-realm.json:/opt/keycloak/data/import/sub3-realm.json:ro,Z
+
+  sub3-nats:
+    image: nats:2.14.4-linux
+    container_name: sub3-nats
+    restart: unless-stopped
+    ports:
+      - "4222:4222"

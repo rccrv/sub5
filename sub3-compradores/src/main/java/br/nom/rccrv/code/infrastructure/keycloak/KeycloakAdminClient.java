@@ -1,5 +1,6 @@
 package br.nom.rccrv.code.infrastructure.keycloak;
 
+import br.nom.rccrv.code.arch.port.service.CreateUserAuthServicePort;
 import br.nom.rccrv.code.infrastructure.config.KeycloakAdminConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,7 +16,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.List;
 
 @ApplicationScoped
-public class KeycloakAdminClient {
+public class KeycloakAdminClient implements CreateUserAuthServicePort {
 
     private final KeycloakAdminConfig config;
     private final Keycloak keycloak;

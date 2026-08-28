@@ -2,7 +2,8 @@ package br.nom.rccrv.code.endpoint.comprador;
 
 import br.nom.rccrv.code.arch.controller.CompradorController;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
-import br.nom.rccrv.code.infrastructure.persistence.repository.CompradorRepository;
+import br.nom.rccrv.code.domain.mapper.CompradorOutputMapper;
+import br.nom.rccrv.code.infrastructure.persistence.adapter.CompradorRepositoryAdapter;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
@@ -24,11 +25,11 @@ import java.util.List;
 @Path("/listar")
 public class ListarCompradoresParaAutorizarEndpoint {
 
-    CompradorRepository compradorRepository;
+    CompradorRepositoryAdapter compradorRepository;
     CompradorController controller;
 
     @Inject
-    public ListarCompradoresParaAutorizarEndpoint(CompradorRepository compradorRepository) {
+    public ListarCompradoresParaAutorizarEndpoint(CompradorRepositoryAdapter compradorRepository) {
         this.compradorRepository = compradorRepository;
         this.controller = new CompradorController(compradorRepository);
     }
@@ -58,6 +59,10 @@ public class ListarCompradoresParaAutorizarEndpoint {
     @RunOnVirtualThread
     @RolesAllowed("funcionario")
     public RestResponse<List<CompradorRespDto>> listar() {
-        return RestResponse.ok(controller.listar());
+        var resp = controller.listar().stream()
+            .map(CompradorOutputMapper::paraRespDto)
+            .toList();
+
+        return RestResponse.ok(resp);
     }
 }
