@@ -62,7 +62,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./sub3-financeiro
-          file: ./sub3-financeiro/src/main/docker/Dockerfile.jvm
+          file: ./misc/aws/financeiro/Dockerfile.jvm
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
