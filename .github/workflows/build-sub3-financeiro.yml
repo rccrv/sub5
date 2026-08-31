@@ -2,6 +2,7 @@ name: Build sub3-financeiro
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   build:
