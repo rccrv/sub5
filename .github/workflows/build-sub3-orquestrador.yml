@@ -14,7 +14,7 @@ jobs:
       run:
         working-directory: sub3-orquestrador
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/sub3-orquestrador
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/sub5-sub3-orquestrador
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -39,13 +39,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Check GHCR credentials
+        if: github.event_name != 'pull_request'
+        env:
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          if [[ -z "$GHCR_USERNAME" || -z "$GHCR_TOKEN" ]]; then
+            echo '::error::Set GHCR_USERNAME and GHCR_TOKEN repository secrets. GHCR_TOKEN must be a classic PAT with read:packages and write:packages.'
+            exit 1
+          fi
+
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME || github.actor }}
-          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Extract Docker metadata
         id: meta
