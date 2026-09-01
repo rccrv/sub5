@@ -44,8 +44,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_USERNAME || github.actor }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Extract Docker metadata
         id: meta
@@ -63,7 +63,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./sub3-financeiro
-          file: ./misc/aws/financeiro/Dockerfile.jvm
+          file: ./sub3-financeiro/src/main/docker/Dockerfile.jvm
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
