@@ -15,12 +15,12 @@ final public class AutorizarCompradorInteractorImpl implements AutorizarComprado
 
     public static AutorizarCompradorInteractor factory(
             CompradorRepositoryPort compradorRepository,
-            CreateUserAuthServicePort keycloakAdminController
+            CreateUserAuthServicePort createUserAuthServicePort
     ) {
         var interactor = new AutorizarCompradorInteractorImpl();
 
         interactor.compradorRepository = compradorRepository;
-        interactor.createUserAuthServicePort = keycloakAdminController;
+        interactor.createUserAuthServicePort = createUserAuthServicePort;
 
         return interactor;
     }

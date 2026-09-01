@@ -1,10 +1,10 @@
 package br.nom.rccrv.code.api.endpoint.comprador;
 
 import br.nom.rccrv.code.arch.controller.CompradorController;
+import br.nom.rccrv.code.arch.port.service.CreateUserAuthServicePort;
 import br.nom.rccrv.code.domain.dto.CompradorReqDto;
 import br.nom.rccrv.code.domain.dto.CompradorRespDto;
 import br.nom.rccrv.code.domain.mapper.CompradorOutputMapper;
-import br.nom.rccrv.code.infrastructure.keycloak.KeycloakAdminClient;
 import br.nom.rccrv.code.infrastructure.persistence.adapter.CompradorRepositoryAdapter;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.enterprise.context.RequestScoped;
@@ -22,18 +22,16 @@ import org.jboss.resteasy.reactive.RestResponse;
 public class AutorizarCompradorEndpoint {
 
     CompradorRepositoryAdapter compradorRepository;
-    KeycloakAdminClient keycloakAdminController;
     CompradorController controller;
 
     @Inject
     public AutorizarCompradorEndpoint(
         CompradorRepositoryAdapter compradorRepository,
-        KeycloakAdminClient keycloakAdminController
+        CreateUserAuthServicePort createUserAuthServicePort
     ) {
         this.compradorRepository = compradorRepository;
-        this.keycloakAdminController = keycloakAdminController;
         this.controller = new CompradorController(compradorRepository);
-        this.controller.setCreateUserAuthServicePort(keycloakAdminController);
+        this.controller.setCreateUserAuthServicePort(createUserAuthServicePort);
     }
 
     @PUT

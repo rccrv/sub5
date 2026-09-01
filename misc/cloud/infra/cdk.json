@@ -1,0 +1,6 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/cars-galore-infra.ts",
+  "context": {
+    "environmentName": "dev"
+  }
+}

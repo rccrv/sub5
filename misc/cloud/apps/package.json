@@ -1,0 +1,24 @@
+{
+  "name": "cars-galore-cloud-apps",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit",
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy --all",
+    "destroy": "cdk destroy --all --force",
+    "test": "tsx --test test/**/*.test.ts",
+    "bootstrap-ghcr": "tsx scripts/bootstrap-ghcr.ts"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.267.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "aws-cdk": "^2.1139.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.0"
+  }
+}

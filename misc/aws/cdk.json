@@ -1,9 +1,0 @@
-{
-  "app": "npx ts-node --prefer-ts-exts bin/cars-galore.ts",
-  "context": {
-    "runApps": false,
-    "runStateful": false,
-    "imageTag": "latest",
-    "ghcrOwner": "OWNER"
-  }
-}
