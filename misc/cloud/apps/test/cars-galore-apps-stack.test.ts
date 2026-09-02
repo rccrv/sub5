@@ -10,7 +10,12 @@ const configuration: AppsEnvironment = {
   region: 'sa-east-1',
   stackName: 'CarsGalore-apps-test',
   ghcrOwner: 'example',
-  imageTag: 'sha-test',
+  imageTags: {
+    compradores: 'sha-compradores',
+    principal: 'sha-principal',
+    orquestrador: 'sha-orquestrador',
+    financeiro: 'sha-financeiro'
+  },
   vpcId: 'vpc-0123456789abcdef0',
   publicSubnetIds: ['subnet-0123456789abcdef2', 'subnet-0123456789abcdef3'],
   publicSubnetAzs: ['sa-east-1a', 'sa-east-1c'],
@@ -53,6 +58,20 @@ test('deploys Kafka and four private Fargate applications', () => {
       Environment: Match.arrayWith([Match.objectLike({ Name: 'KAFKA_ADVERTISED_LISTENERS', Value: 'PLAINTEXT://kafka.sub3.local:9092' })])
     })])
   });
+});
+
+test('uses the configured immutable image tag for each application', () => {
+  const synthesized = template();
+  for (const image of [
+    'ghcr.io/example/sub5-sub3-compradores:sha-compradores',
+    'ghcr.io/example/sub5-sub3-principal:sha-principal',
+    'ghcr.io/example/sub5-sub3-financeiro:sha-financeiro',
+    'ghcr.io/example/sub5-sub3-orquestrador:sha-orquestrador'
+  ]) {
+    synthesized.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      ContainerDefinitions: Match.arrayWith([Match.objectLike({ Image: image })])
+    });
+  }
 });
 
 test('exposes only the orchestrator and wires runtime configuration', () => {

@@ -17,6 +17,7 @@ export interface CarsGaloreAppsStackProps extends StackProps {
 type AppService = {
   id: string;
   imageName: string;
+  imageTag: string;
   discoveryName: string;
   environment: Record<string, string>;
   useDatabase?: boolean;
@@ -110,7 +111,7 @@ export class CarsGaloreAppsStack extends Stack {
     const databaseUrl = (database: string) => `jdbc:postgresql://${config.rdsEndpoint}:${config.rdsPort}/${database}?sslmode=require`;
     const appServices: AppService[] = [
       {
-        id: 'Compradores', imageName: 'sub5-sub3-compradores', discoveryName: 'compradores', useDatabase: true, cognitoAdmin: true,
+        id: 'Compradores', imageName: 'sub5-sub3-compradores', imageTag: config.imageTags.compradores, discoveryName: 'compradores', useDatabase: true, cognitoAdmin: true,
         environment: {
           POSTGRES_URL: databaseUrl('compradores'),
           AWS_REGION: config.region,
@@ -119,18 +120,18 @@ export class CarsGaloreAppsStack extends Stack {
         }
       },
       {
-        id: 'Principal', imageName: 'sub5-sub3-principal', discoveryName: 'principal', useDatabase: true,
+        id: 'Principal', imageName: 'sub5-sub3-principal', imageTag: config.imageTags.principal, discoveryName: 'principal', useDatabase: true,
         environment: { POSTGRES_URL: databaseUrl('principal') }
       },
       {
-        id: 'Financeiro', imageName: 'sub5-sub3-financeiro', discoveryName: 'financeiro', useDatabase: true,
+        id: 'Financeiro', imageName: 'sub5-sub3-financeiro', imageTag: config.imageTags.financeiro, discoveryName: 'financeiro', useDatabase: true,
         environment: {
           POSTGRES_URL: databaseUrl('financeiro'),
           KAFKA_SERVER: `kafka.${config.cloudMapNamespace}:9092`
         }
       },
       {
-        id: 'Orquestrador', imageName: 'sub5-sub3-orquestrador', discoveryName: 'orquestrador',
+        id: 'Orquestrador', imageName: 'sub5-sub3-orquestrador', imageTag: config.imageTags.orquestrador, discoveryName: 'orquestrador',
         environment: {
           COMPRADORES_SERVICE_URL: `http://compradores.${config.cloudMapNamespace}:8080`,
           VEICULOS_SERVICE_URL: `http://principal.${config.cloudMapNamespace}:8080`,
@@ -221,7 +222,7 @@ export class CarsGaloreAppsStack extends Stack {
       taskRole
     });
     const container = taskDefinition.addContainer('Container', {
-      image: ecs.ContainerImage.fromRegistry(`ghcr.io/${config.ghcrOwner}/${service.imageName}:${config.imageTag}`, {
+      image: ecs.ContainerImage.fromRegistry(`ghcr.io/${config.ghcrOwner}/${service.imageName}:${service.imageTag}`, {
         credentials: input.ghcrCredentials
       }),
       logging: ecs.LogDrivers.awsLogs({ logGroup: input.logGroup, streamPrefix: service.discoveryName }),

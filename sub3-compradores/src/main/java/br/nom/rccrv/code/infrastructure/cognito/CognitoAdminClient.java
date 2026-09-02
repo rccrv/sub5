@@ -37,7 +37,7 @@ public class CognitoAdminClient implements CreateUserAuthServicePort {
     }
 
     static AwsCredentialsProvider credentialsProvider(CognitoAdminConfig config) {
-        String profile = config.awsProfile();
+        String profile = config.awsProfile().orElse(null);
         if (profile == null || profile.isBlank()) {
             return DefaultCredentialsProvider.create();
         }

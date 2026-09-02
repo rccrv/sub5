@@ -20,14 +20,14 @@ psql "host=$RDS_ENDPOINT port=$RDS_PORT dbname=financeiro user=sub3 sslmode=requ
 
 ## Build and push images
 
-Build each application before starting the tasks. Use the image tag in `.env` for every image:
+Build each application before starting the tasks. Use the corresponding image tag in `.env`:
 
 ```bash
 mvn -B package
-docker build -f sub3-compradores/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-compradores:$IMAGE_TAG sub3-compradores
-docker build -f sub3-principal/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-principal:$IMAGE_TAG sub3-principal
-docker build -f sub3-orquestrador/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-orquestrador:$IMAGE_TAG sub3-orquestrador
-docker build -f sub3-financeiro/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-financeiro:$IMAGE_TAG sub3-financeiro
+docker build -f sub3-compradores/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-compradores:$COMPRADORES_IMAGE_TAG sub3-compradores
+docker build -f sub3-principal/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-principal:$PRINCIPAL_IMAGE_TAG sub3-principal
+docker build -f sub3-orquestrador/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-orquestrador:$ORQUESTRADOR_IMAGE_TAG sub3-orquestrador
+docker build -f sub3-financeiro/src/main/docker/Dockerfile.jvm -t ghcr.io/$GHCR_OWNER/sub5-sub3-financeiro:$FINANCEIRO_IMAGE_TAG sub3-financeiro
 ```
 
 Push the four tags to private GHCR after logging in with a token that has package write access.

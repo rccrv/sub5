@@ -6,7 +6,12 @@ export type AppsEnvironment = {
   region: string;
   stackName: string;
   ghcrOwner: string;
-  imageTag: string;
+  imageTags: {
+    compradores: string;
+    principal: string;
+    orquestrador: string;
+    financeiro: string;
+  };
   vpcId: string;
   publicSubnetIds: string[];
   publicSubnetAzs: string[];
@@ -94,7 +99,12 @@ export function appsEnvironment(): AppsEnvironment {
     region: required('AWS_REGION'),
     stackName: required('APPS_STACK_NAME'),
     ghcrOwner: required('GHCR_OWNER').toLowerCase(),
-    imageTag: required('IMAGE_TAG'),
+    imageTags: {
+      compradores: required('COMPRADORES_IMAGE_TAG'),
+      principal: required('PRINCIPAL_IMAGE_TAG'),
+      orquestrador: required('ORQUESTRADOR_IMAGE_TAG'),
+      financeiro: required('FINANCEIRO_IMAGE_TAG')
+    },
     vpcId: required('INFRA_VPC_ID'),
     publicSubnetIds,
     publicSubnetAzs,

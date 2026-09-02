@@ -3,6 +3,8 @@ package br.nom.rccrv.code.infrastructure.config;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 
+import java.util.Optional;
+
 @ConfigMapping(prefix = "cognito")
 public interface CognitoAdminConfig {
 
@@ -12,8 +14,7 @@ public interface CognitoAdminConfig {
     @WithDefault("")
     String userPoolId();
 
-    @WithDefault("")
-    String awsProfile();
+    Optional<String> awsProfile();
 
     @WithDefault("comprador")
     String compradorGroup();
