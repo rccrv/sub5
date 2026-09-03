@@ -1,0 +1,42 @@
+meta {
+  name: Reservar comprador2
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{orquestrador_url}}/pagamentos/reservas
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "placa": "ABC1D23",
+    "endereco": "Rua do Comprador 2, 100, São Paulo - SP",
+    "cep": "01305-000"
+  }
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("comprador2_bearer_token")}`
+  )
+}
+
+script:post-response {
+  bru.setVar("pix_comprador2", res.body.pixCode)
+  bru.setVar("id_comprador2", res.body.id)
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

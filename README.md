@@ -1,140 +1,267 @@
-# Tarefa substitutiva da 3ª atividade
+# Tarefa substitutiva da 5ª atividade
 
-Esse repositório contém uma implementação da atividade substitutiva da fase 3 da pós-graduação em Software Architecture.
+Esse repositório contém uma implementação da atividade substitutiva da fase 5 da pós-graduação em Software Architecture.
+
+## O que não foi implementado
+
+O relatório de segurança de informação não foi feito.
 
 ## O que foi implementado
 
-O enunciado elencava e descrevia o sistema simples de revenda de veículos.
+O enunciado pedia para acrescentar ao sistema de compras da atividade substitutiva anterior um sistema de gerenciamento
+que levasse em conta o comportamento concorrente dos clientes.
 
-Não ficou claro para mim se seria necessário implementar algum sistema de conta financeira para o cliente
-para verificar se o cliente contém fundos para comprar um veículo. Após ponderar um pouco, decidi implementar
-apenas o sistema de cadastro de usuários, venda e autenticação.
+O sistema foi feito em Java usando o framework Quarkus. O repositório contém um projeto maven com quatro
+submódulos. Os projetos não podem importar arquivos entre si.
 
-O sistema foi feito em Java usando o framework Quarkus. O repositório contém um projeto maven com dois
-submódulos. A divisão em módulos não faz os dois terem conexão. Os projetos não podem importar arquivos entre si.
-Só trabalhei dessa forma para que os dois projetos pudessem ser abertos num mesmo contexto da IDE que uso.
+Só trabalhei dessa forma para que os quatro projetos pudessem ser abertos num mesmo contexto da IDE que uso.
 
-Como não queria lidar com ambientes em cloud para essa tarefa, o deploy é feito via manifests Kubernetes
-num cluster local. O runner usado na tarefa também roda localmente.
+O deploy é feito usando CDK na AWS. Por falta de tempo e dado a demora de subir contextos em cloud, não implementei
+deploy automatizado. Os deploys tiveram de ser disparados via linha de comando de meu computador de desenvolvimento.
 
-Além dessas ferramentas são usados o PostgreSQL para persistência dos dados dos sistemas e o Keycloak para autenticação
-e autorização dos usuários.
+Os passos estão explicados no diretório misc/aws, mas isso não será mostrado no vídeo de demonstração.
 
-O repositório no github contém uma política que previne pushes na branch main. Builds e deloys são disparados
-quando há um novo commit nessa branch. Dessa forma, é necessário fazer push em outra branch e abrir um PR contra
-a main para que o build ocorra.
+As ferramentas da AWS usadas são o Cognito para autenticação de funcionários, financeiro e compradores e cadastro de
+compradores, o RDS PostgreSQL como solução de banco de dados e o Fargate como solução serverless de contêineres.
+
+Inicialmente tentei usar o AWS MSK para comunicação entre microsserviços no contexto da SAGA adotada, mas tive problemas
+em subir o serviço. Debugar subidas do MSK demorava algo em torno de 30 minutos para ver ele tentar subir e mais 20 para
+derrubar o stack. Grande parte do atraso da entrega foi graças a isso.
+
+No final, decidi subir um contêiner usando a imagem kafka-native no Fargate e usar ela internamente mesmo.
 
 ### Considerações da implementação
 
 #### Organização do código
 
-Tentei seguir uma estrutura de Clean Architecture. Percebo nesse momento que alguns pontos não ficaram totalmente
-aderentes a essa estrutura.
+A estrutura Clean Architecture ficou melhor do que na primeira versão. Agora o projeto usa ports dentro da parte da
+arquitetura. Esses ports são apenas interfaces implementadas por classes fora da pasta de arquitetura.
 
-Primeiro, mappers (chamados de adapters) deveriam ter ficado fora da pasta de arquitetura (pasta src/main/java/.../arch)
-dos projetos. Como eles referencias elementos que estão fora do núcleo da aplicação, não deveriam estar dentro dela.
+Os mappers também estão fora da parte de arquitetura e toda transformação de dados ocorre em camadas implementadas
+fora da parte de aquitetura.
 
-Segundo, repositórios de acessos de bancos de dados e serviço de acesso ao Keycloak deveriam implementar interfaces
-portas definidas dentro da arquitetura e passados para dentro dos usecases usando-se de polimorfismo.
-
-Terceira, a pasta controller também deveria estar fora ou alterada para que apenas referencie elementos de dentro do
-núcleo arquitetural. Em outra tarefa mantive essa pasta fora.
-
-Apesar disso, creio que a estrutura esteja relativamente bem organizada e com adesão o mais próximo possível aos
-princípios de Clean Architecture.
+Estruturalmente, o projeto está muito melhor organizado e com adesão o mais próximo possível aos  princípios de
+Clean Architecture em relação a versão anterior.
 
 #### Arquitetura da aplicação
 
-Conforme explicado. Além dos dois serviços implementados, o conjunto de serviços inclui um postgres e um keycloak.
+Conforme explicado. Além dos dois serviços implementados, o conjunto de serviços inclui, o Cognito e o RDS Postgres.
+Os serviços e o contêiner Kafka foram deployados no Fargate.
 
-Basicamente, o diagrama abaixo mostra o relacionamento entre os serviços:
+O diagrama abaixo mostra o relacionamento entre os serviços:
 
-![Arquitetura](/docs/arch.png)
+![Arquitetura](/docs/arch.svg)
 
-Os serviços comunicam e provêm endpoints que dependem na grande maioria dos casos de autorização provida pelo
-keycloak. O serviço de compradores permite aos clientes fazerem o próprio cadastro. Esse cadastro precisa ser
-aprovado por um funcionário da empresa.
+Para essa versão usamos um orquestrador de SAGA que também faz a função de Backend for Frontend. Esse serviço concentra
+os endpoints dos outros e os chama quando cliente. Ele também é o único serviço exposto e o único cujos endpoints
+precisam de autorização. Além disso, faz a orquestração de rollbacks de compras inválidas.
 
-Uma vez que o cadastro é feito, o cliente pode acessar os endpoints do sistema principal que permite a ele fazer 
-compras dos carros listados no sistema.
+O fluxo de compra para um cliente é que ele reserva um veículo e pode então comprar um veículo reservado.
 
-Apenas funcionários podem cadastrar novos carros.
+Compras inválidas são quando um cliente tem uma reserva de veículo ativa e tenta comprar um veículo que já foi comprado
+por outro comprador.
+
+A SAGA manda compensação para esse cenário caso a compra seja inválida.
+
+Apenas funcionários podem cadastrar novos carros. Os compradores só podem acessar dados de suas próprias compras.
+
+##### SAGA
+
+Nesse projeto usamos SAGA orquestrada. Um orquestrador fica responsável por receber acknowledgements e enviar
+compensações e finalizações de compras de veículos inválidas.
+
+A justificativa para isso é que se trata do único fluxo diferente do projeto anterior e os outros estavam já bem
+atendidos pela divisão em microsserviços que cuidem de apenas uma parte do domínio.
 
 #### Bancos de dados
 
-O postgres provê dois bancos de dados. Um para cadas serviço.
+O RDS contém três bancos de dados. Um para cadas serviço que não é o orquestrador: compradores, principal e financeiro.
 
-O primeiro é o banco de compradores. Os clientes fazem o próprio cadastro nesse banco.  Uma vez que o cadastro
-é autorizado, a conta do cliente é criada no keycloak e ele pode usar então usar sua conta para fazer compras
-nos endpoints do sistema principal.
+O primeiro é o banco de compradores. Os clientes fazem o próprio cadastro nesse banco. Uma vez que o cadastro
+é autorizado, a conta do cliente é criada no cognito e ele pode usar então usar sua conta para fazer compras
+de veículos.
 
-O segundo banco é o do sistema principal. Funcionários fazem o cadastro de carros nesse banco e os clientes
-podem comprar carros usando os endpoints do sistema principal.
+O segundo banco é o do sistema principal. Funcionários fazem o cadastro de carros nesse banco.
 
-Cada banco tem apenas uma tabela que seguem os diagramas abaixo.
+O terceiro é o banco financeiro. As reservas e compras são registradas nesse banco.
+
+Cada banco tem apenas uma tabela conforme diagrama abaixo:
 
 compradores (bd compradores):
 
-![compradores](/docs/compradores.png)
-
-veiculos (bd principal):
-
-![veiculos](/docs/veiculos.png)
+![compradores](/docs/db.svg)
 
 ## Execução local e testes
 
-### Lista de endpoints e roles necessárias para acessá-los
-
-#### Sistema compradores
-
-| Endpoint         | Método | Role        |
-|------------------|--------|-------------|
-| /cadastrar       | POST   |             |
-| /listar          | GET    | funcionario |
-| /autorizar/{cpf} | PUT    | funcionario |
-
-#### Sistema principal
-
-| Endpoint         | Método | Role                     |
-|------------------|--------|--------------------------|
-| /cadastrar       | POST   | funcionario              |
-| /editar/{placa}  | PUT    | funcionario              |
-| /listar-venda    | GET    | funcionario ou comprador |
-| /listar-vendidos | GET    | funcionario              |
-| /comprar/{placa} | PUT    | funcionario              |
-
 ### Como rodar localmente
 
-Entrar na pasta docker e executar o comando para subir os contêineres necessários (um keycloak e um postgres):
+O sistema não tem uma maneira de rodar localmente. O docker compose foi feito pensando na versão anterior do sistema
+que não usava AWS. Tentei num primeiro momento usar o LocalStack para simular a AWS localmente, mas deu trabalho e o
+resultado não foi bom. Dessa forma isso não foi feito.
+
+### Como fazer deploy do sistema
+
+O deploy é dividido em duas partes. Ambas são projetos CDK e se encontram em misc/cloud.
+
+Primeiro é necessário fazer o deploy da infraestrutura. Necessário ter uma CLI aws instalada e logada. Basta então
+executar os comandos abaixo:
 
 ```shell
-cd docker
-docker compose up -d
+cd misc/cloud/infra
+export CDK_DEFAULT_REGION=sa-east-1
+export CDK_ALLOWED_CIDR="$(curl -4 -s https://checkip.amazonaws.com)/32"
+npm ci
+npm run build
+npm run synth
+npm run deploy
 ```
 
-Depois necessário rodar os dois subprojetos (sub3-compradores e sub3-principal) em desenvolvimento, um em cada terminal:
+Ao fazer isso, o Cognito já é criado com as roles necessárias e usuários de exemplo em cada role.
+
+O RDS por sua vez só cria os 3 bancos e é necessário executar as DDLs de criação de cada banco. As DDLs se encontram em
+docs/sql.
+
+Para conectar com o banco postgres use os comandos abaixo (necessário ter o psql e o jq instalados):
+ 
+```shell
+export PGHOST="$(aws cloudformation describe-stacks \
+  --stack-name CarsGalore-infra-dev \
+  --region sa-east-1 \
+  --query 'Stacks[0].Outputs[?OutputKey==`PostgresEndpoint`].OutputValue' \
+  --output text)"
+
+export PGPORT=5432
+export PGDATABASE=postgres
+
+SECRET_ARN="$(aws cloudformation describe-stacks \
+  --stack-name CarsGalore-infra-dev \
+  --region sa-east-1 \
+  --query 'Stacks[0].Outputs[?OutputKey==`PostgresCredentialsSecretArn`].OutputValue' \
+  --output text)"
+
+SECRET_JSON="$(aws secretsmanager get-secret-value \
+  --secret-id "$SECRET_ARN" \
+  --region sa-east-1 \
+  --query SecretString \
+  --output text)"
+
+export PGUSER="$(echo "$SECRET_JSON" | jq -r .username)"
+export PGPASSWORD="$(echo "$SECRET_JSON" | jq -r .password)"
+export PGSSLMODE=require
+
+export PGDATABASE=principal
+psql
+```
+
+Dentro do banco, use os comandos abaixo:
+
+```sql
+-- principal
+CREATE TABLE public.veiculos (
+  id bigserial NOT NULL,
+  marca text NOT NULL,
+  modelo text NOT NULL,
+  ano integer NOT NULL,
+  placa text NOT NULL,
+  cor text NOT NULL,
+  valor numeric(12,2) NOT NULL,
+  comprador_cpf text NOT NULL,
+  pagamento_id uuid,
+  vendido boolean DEFAULT false NOT NULL,
+  CONSTRAINT veiculos_placa_check CHECK ((placa ~ '^[A-Z]{3}[0-9][A-Z][0-9]{2}$'::text))
+);
+\c compradores
+-- compradores
+CREATE TABLE public.compradores (
+  id bigserial NOT NULL,
+  cpf text NOT NULL,
+  primeiro_nome text NOT NULL,
+  ultimo_nome text NOT NULL,
+  email text NOT NULL,
+  telefone text NOT NULL,
+  autorizado boolean DEFAULT false NOT NULL,
+  CONSTRAINT compradores_cpf_check CHECK ((cpf ~ '^\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11}$'::text))
+);
+\c financeiro
+-- financeiro
+CREATE TABLE public.pagamentos (
+  id bigserial NOT NULL,
+  correlation_id uuid NOT NULL,
+  cpf text NOT NULL,
+  placa text NOT NULL,
+  endereco text NOT NULL,
+  cep text NOT NULL,
+  pix_code text NOT NULL,
+  quoted_amount numeric(12,2) NOT NULL,
+  settled_amount numeric(12,2),
+  status varchar(32) NOT NULL,
+  created_at timestamp without time zone NOT NULL,
+  expires_at timestamp without time zone NOT NULL,
+  updated_at timestamp without time zone,
+  version bigint NOT NULL DEFAULT 0,
+  CONSTRAINT pagamentos_pkey PRIMARY KEY (id),
+  CONSTRAINT pagamentos_correlation_id_key UNIQUE (correlation_id),
+  CONSTRAINT pagamentos_pix_code_key UNIQUE (pix_code)
+);
+```
+
+Após fazer o deploy da infraestrutura, podemos subir os serviços:
+```shell
+# Necessário configurar o .env corretamente
+cd misc/cloud/apps
+npm ci
+npm run build
+RUN_APPS=false npm run deploy
+npm run bootstrap-ghcr
+RUN_APPS=true npm run deploy
+```
+
+Com esses comandos, a infraestrutura subirá e estará pronta para os testes.
+
+Alguns dados são importantes para conseguirmos fazer uso dos endpoints do aplicativo. Client ID usado pelo Cognito e URL
+do orquestrador.
+
+Para obter o Client ID do Cognito, basta executar:
 
 ```shell
-cd sub3-compradores
-mvn quarkus:dev
+aws cloudformation describe-stacks \
+  --stack-name CarsGalore-infra-dev \
+  --region sa-east-1 \
+  --query "Stacks[0].Outputs[?OutputKey=='CognitoUserClientId'].OutputValue" \
+  --output text
 ```
+
+Para obter a URL do orquestrador deployado basta usar:
 
 ```shell
-cd sub3-principal
-mvn quarkus:dev
+aws cloudformation describe-stacks \
+  --stack-name CarsGalore-apps-dev \
+  --region sa-east-1 \
+  --query "Stacks[0].Outputs[?OutputKey=='OrquestradorUrl'].OutputValue" \
+  --output text
 ```
 
-O postgres vai rodar na porta 5432 e o keycloak na porta 8080. O projeto compradores roda na porta 8081 e o
-projeto principal na porta 8082.
+### Lista de endpoints e roles necessárias para acessá-los
+
+#### Sistema orquestrador
+
+| Endpoint                     | Método | Role necessária          |
+|------------------------------|--------|--------------------------|
+| /compradores/cadastrar       | POST   | público (sem role)       |
+| /compradores/autorizar/{cpf} | PUT    | funcionario              |
+| /compradores/listar          | GET    | funcionario              |
+| /veiculos/cadastrar          | POST   | funcionario              |
+| /veiculos/editar/{placa}     | PUT    | funcionario              |
+| /veiculos/listar-venda       | GET    | comprador ou funcionario |
+| /veiculos/listar-vendidos    | GET    | funcionario              |
+| /veiculos/comprar/{placa}    | PUT    | comprador                |
+| /pagamentos/reservas         | POST   | comprador                |
+| /pagamentos/{id}/pagar       | POST   | comprador                |
+| /pagamentos/{id}             | GET    | comprador                |
 
 ### Como testar
 
-Para testar o sistema, basta rodar ele localmente. E abrir o conteúdo da pasta misc/tests no software
-[Bruno](https://www.usebruno.com/). Os endpoints listados acima têm testes os testes necessários com validação onde
-essa se faz necessária (validação de CPF e máscara de placa de carro padrão Mercosul).
-
-**Importante**: é necessário usar o environment dev quando se roda localmente. O vídeo vai mostrar a execução no
-environment prod
+Para testar o sistema abrir o conteúdo da pasta misc/tests no software [Bruno](https://www.usebruno.com/).
 
 Os endpoints serão executados na ordem correta no vídeo de apresentação. Logo a sugestão é acompanhar por lá. 
 
@@ -142,4 +269,4 @@ Os endpoints serão executados na ordem correta no vídeo de apresentação. Log
 
 Link do vídeo
 
-[Vídeo](https://youtu.be/KW7my4eOKzU)
+[Vídeo](https://youtu.be/WdPUo1LfHeo)

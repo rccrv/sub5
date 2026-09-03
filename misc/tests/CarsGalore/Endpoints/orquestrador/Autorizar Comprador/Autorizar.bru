@@ -1,0 +1,29 @@
+meta {
+  name: Autorizar
+  type: http
+  seq: 1
+}
+
+put {
+  url: http://{{orquestrador_url}}/compradores/autorizar/{{comprador2_cpf}}
+  body: none
+  auth: inherit
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("funcionario_bearer_token")}`
+  )
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

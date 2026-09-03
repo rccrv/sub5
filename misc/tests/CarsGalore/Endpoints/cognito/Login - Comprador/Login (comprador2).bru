@@ -1,0 +1,48 @@
+meta {
+  name: Login (comprador2)
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://cognito-idp.sa-east-1.amazonaws.com/
+  body: json
+  auth: basic
+}
+
+headers {
+  Content-Type: application/x-amz-json-1.1
+  X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth
+}
+
+auth:basic {
+  username: compradores
+  password: WiGPbgwfBBwoouEdqnVdtJVsaUG3deb2
+}
+
+body:json {
+  {
+    "AuthFlow": "USER_PASSWORD_AUTH",
+    "ClientId": "{{cognito_client_id}}",
+    "AuthParameters": {
+      "USERNAME": "{{comprador2_cpf}}",
+      "PASSWORD": "{{comprador2_cpf}}"
+    }
+  }
+}
+
+body:form-urlencoded {
+  username: {{comprador2_cpf}}
+  password: {{comprador2_cpf}}
+  grant_type: password
+}
+
+script:post-response {
+  bru.setVar("comprador2_bearer_token", res.body.AuthenticationResult.AccessToken)
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

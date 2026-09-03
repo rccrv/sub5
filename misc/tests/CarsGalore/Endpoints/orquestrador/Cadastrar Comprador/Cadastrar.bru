@@ -1,0 +1,36 @@
+meta {
+  name: Cadastrar
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{orquestrador_url}}/compradores/cadastrar
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "cpf": "822.765.420-71",
+    "primeiroNome": "Comprador 2",
+    "ultimoNome": "Sucesso",
+    "email": "comprador2@comprador2.com",
+    "telefone": "(11) 91234-5678"
+  }
+}
+
+script:post-response {
+  bru.setVar("comprador2_cpf", res.body.cpf)
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

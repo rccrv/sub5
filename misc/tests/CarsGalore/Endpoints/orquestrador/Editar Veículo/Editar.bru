@@ -1,0 +1,40 @@
+meta {
+  name: Editar
+  type: http
+  seq: 1
+}
+
+put {
+  url: http://{{orquestrador_url}}/veiculos/editar/{{veiculo1_placa}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "marca": "Gurgel",
+    "modelo": "BR-800",
+    "ano": 1991,
+    "placa": "ABC1D23",
+    "cor": "Prata",
+    "valor": 26000.00
+  }
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("funcionario_bearer_token")}`
+  )
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

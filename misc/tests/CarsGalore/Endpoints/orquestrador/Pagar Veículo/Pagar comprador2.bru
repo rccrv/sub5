@@ -1,0 +1,40 @@
+meta {
+  name: Pagar comprador2
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{orquestrador_url}}/pagamentos/{{id_comprador2}}/pagar
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pixCode": "{{pix_comprador2}}"
+  }
+}
+
+script:pre-request {
+  req.setHeader(
+    "Authorization",
+    `Bearer ${bru.getVar("comprador2_bearer_token")}`
+  )
+}
+
+script:post-response {
+  
+  
+}
+
+tests {
+  test("deve ser bem sucedido", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
