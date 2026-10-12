@@ -4,7 +4,8 @@ Esse repositório contém uma implementação da atividade substitutiva da fase 
 
 ## O que não foi implementado
 
-O relatório de segurança de informação não foi feito.
+O relatório de segurança de dados (RIPD) se encontra em docs/ripd.pdf. O relatório foi escrito usando a ferramenta
+[typst](https://github.com/typst/typst). O documento original se encontra em docs/ripd.typ.
 
 ## O que foi implementado
 
@@ -95,9 +96,30 @@ compradores (bd compradores):
 
 ### Como rodar localmente
 
-O sistema não tem uma maneira de rodar localmente. O docker compose foi feito pensando na versão anterior do sistema
-que não usava AWS. Tentei num primeiro momento usar o LocalStack para simular a AWS localmente, mas deu trabalho e o
-resultado não foi bom. Dessa forma isso não foi feito.
+Localmente o sistema usa a mesma estrutura da tarefa substitutiva 3, usa um kafka usando a imagem kafka-native,  um
+keycloak local e um postgres locais.
+
+Inicialmente tentei usar o ministack e o floci para emular o Cognito, mas nenhum dos dois suporta alguns recursos que
+estou usando no sistema compradores.
+
+Para rodar esses contêineres basta ir na pasta docker e executar:
+
+```shell
+docker compose up -d
+```
+
+Em seguida, ir em cada um dos submódulos (sub3-compradores, sub3-principal, sub3-financeiro e sub3-orquestrador) e
+executar:
+
+```shell
+mvn quarkus:dev
+```
+
+Com isso, é possível testar os endpoints locais usando os testes contidos em misc/tests no software [Bruno](https://www.usebruno.com/).
+
+**Atenção**: Localmente é necessário usar as environment variables no modo dev e fazer a autenticação usando o
+keycloak. Os mesmos testes contém uma subpasta para fazer a autenticação com o Cognito, mas localmente isso não
+é usado.
 
 ### Como fazer deploy do sistema
 

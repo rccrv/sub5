@@ -42,7 +42,8 @@ public class SagaOrchestrator {
   @Inject
   public SagaOrchestrator(
       FinanceiroEmitter financeiroEmitter,
-      @RestClient VeiculosRestClient veiculosClient) {
+      @RestClient VeiculosRestClient veiculosClient
+  ) {
     this.financeiroEmitter = financeiroEmitter;
     this.veiculosClient = veiculosClient;
     activeSagas = new ConcurrentHashMap<>();
