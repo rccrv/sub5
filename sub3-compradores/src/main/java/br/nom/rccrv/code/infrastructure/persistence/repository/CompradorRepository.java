@@ -7,6 +7,7 @@ import jakarta.data.repository.Query;
 import jakarta.data.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CompradorRepository extends CrudRepository<Comprador, Long> {
@@ -15,5 +16,5 @@ public interface CompradorRepository extends CrudRepository<Comprador, Long> {
     List<Comprador> listarCompradoresParaAutorizar();
 
     @Query("select c from Comprador c where c.cpf = :cpf")
-    Comprador findByCpf(@Param("cpf") String cpf);
+    Optional<Comprador> findByCpf(@Param("cpf") String cpf);
 }

@@ -33,15 +33,12 @@ public class CompradorRepositoryAdapter implements CompradorRepositoryPort {
 
     @Override
     public void rollbackSave(CompradorEntity comprador) {
-        var persistedEntity = repository.findByCpf(comprador.getCpf());
-        if (persistedEntity != null) {
-            repository.delete(persistedEntity);
-        }
+        repository.findByCpf(comprador.getCpf()).ifPresent(repository::delete);
     }
 
     @Override
     public Optional<CompradorEntity> findByCpf(String cpf) {
-        return Optional.ofNullable(repository.findByCpf(cpf))
+        return repository.findByCpf(cpf)
             .map(CompradorInputMapper::deJpa);
     }
 

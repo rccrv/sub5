@@ -7,13 +7,14 @@ import jakarta.data.repository.Query;
 import jakarta.data.repository.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface VeiculoRepository extends CrudRepository<Veiculo, Long> {
 
     @Query("select v from Veiculo v where v.placa = :placa")
-    Veiculo findByPlaca(@Param("placa") String placa);
+    Optional<Veiculo> findByPlaca(@Param("placa") String placa);
 
     @Query("select v from Veiculo v where v.vendido = false order by v.valor asc")
     List<Veiculo> listarVeiculosAVenda();
@@ -28,7 +29,7 @@ public interface VeiculoRepository extends CrudRepository<Veiculo, Long> {
         @Param("pagamentoId") UUID pagamentoId
     );
 
-    @Query("update Veiculo v set v.vendido = false, v.compradorCpf = null, v.pagamentoId = null where v.placa = :placa and v.pagamentoId = :pagamentoId")
+    @Query("update Veiculo v set v.vendido = false, v.compradorCpf = '', v.pagamentoId = null where v.placa = :placa and v.pagamentoId = :pagamentoId")
     long rollbackSale(
         @Param("placa") String placa,
         @Param("pagamentoId") UUID pagamentoId

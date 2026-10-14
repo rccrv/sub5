@@ -42,7 +42,7 @@ Os mappers também estão fora da parte de arquitetura e toda transformação de
 fora da parte de aquitetura.
 
 Estruturalmente, o projeto está muito melhor organizado e com adesão o mais próximo possível aos  princípios de
-Clean Architecture em relação a versão anterior.
+Clean Architecture em relação à versão anterior.
 
 #### Arquitetura da aplicação
 
@@ -292,3 +292,5 @@ Os endpoints serão executados na ordem correta no vídeo de apresentação. Log
 Link do vídeo
 
 [Vídeo](https://youtu.be/WdPUo1LfHeo)
+
+[Link do segundo vídeo sobre como rodar localmente](https://youtu.be/KS3NEeFeOPA)

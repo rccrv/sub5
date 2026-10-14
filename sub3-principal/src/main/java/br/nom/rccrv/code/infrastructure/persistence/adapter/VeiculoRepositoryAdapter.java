@@ -34,7 +34,7 @@ public class VeiculoRepositoryAdapter implements VeiculoRepositoryPort {
 
     @Override
     public Optional<VeiculoEntity> findByPlaca(String placa) {
-        return Optional.ofNullable(repository.findByPlaca(placa))
+        return repository.findByPlaca(placa)
             .map(VeiculoInputMapper::deJpa);
     }
 
